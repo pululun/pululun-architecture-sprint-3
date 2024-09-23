@@ -1,0 +1,17 @@
+@startuml
+title smart-home-device microservices Management Code Diagram
+
+actor User
+
+User -> CommandDeviceController : Command request (JSON)
+CommandDeviceController -> CommandDeviceProducer : Request write kafka topic
+CommandDeviceProducer -> TopicCOMMAND_CONTROL : write topic (COMMAND_CONTROL)
+TopicCOMMAND_CONTROL -> CommandDeviceConsumer : read topic (COMMAND_CONTROL)
+CommandDeviceConsumer -> CommandDeviceService : request for the ability to execute a command
+CommandDeviceService -> ManagerDeviceState : request get actual state device
+ManagerDeviceState --> CommandDeviceService : response actual state device
+CommandDeviceService -> CommandDeviceRepository : save an attempt to form a command (for rollback)
+CommandDeviceService -> CommandDeviceProducer : Request write kafka topic
+CommandDeviceProducer -> TopicCOMMAND_DEVICE : write topic (COMMAND_DEVICE)
+CommandDeviceProducer -> CommandDeviceConsumer : manual call (offset shift)
+@enduml

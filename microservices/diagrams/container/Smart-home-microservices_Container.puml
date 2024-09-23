@@ -1,0 +1,73 @@
+@startuml
+title FitLife Container Diagram
+
+top to bottom direction
+
+!include ../basic/C4_Component.puml
+
+System(UserAndBox, "User and smart box", "User and smart box generated request and response queries")
+System(VpnNetwork, "VPN network", "VPN Network for kafka request|response")
+System(Backend, "Backend", "Backend Smart home")
+
+
+Container_Boundary(UserAndBox, "smart-home-sensors-box and user") {
+Person(user, "User", "A user of the smart home")
+Container(smartSensorsBox, "smart-home-sensors-box", "Orange PI Zero 3 (1GB), Linux, Java, Spring boot", "smart-home-sensors-box for get data sensors and smart home control")
+}
+
+Container(ui, "Frontend", "React, Nginx", "Frontend for smart home monolith")
+
+
+Container_Boundary(VpnNetwork, "VpnNetwork") {
+Container(sluice, "VPN sluice", "VPN sluice with dynamics DNS")
+SystemQueue(producer_queue, "Kafka", "Static create topics (producer on user or smart box)")
+SystemQueue(consumer_queue, "Kafka", "Dynamic create topics (producer on backend microservices)")
+}
+
+Container_Boundary(Backend, "Backend") {
+Container(GW, "Spring cloud gateway", "API Gateway")
+Container(SmartHomeDevice, "smart-home-device", "Java, Spring, kafka, REST", "smart-home-device")
+Container(Authentication, "smart-home-authentication API", "Java, Spring boot (Security), REST", "Authentication service")
+Container(Authorization, "smart-home-authorization API", "Java, Spring boot (Security), REST", "Authorization service")
+Container(SmartHomeTelemetry, "smart-home-telemetry API", "Java, Spring, kafka, REST", "smart-home-telemetry")
+Container(SmartHomeHeating, "smart-home-heating API", "Java, Spring, kafka, REST", "smart-home-heating")
+Container(SmartHomeAutomaticGate, "smart-home-automatic-gate API", "Java, Spring, kafka, REST", "smart-home-automatic-gate")
+Container(SmartHomeMonitoringStructure, "smart-home-monitoring-structure API", "Java, Spring, kafka, REST", "smart-home-monitoring-structure")
+Container(SmartHomeLighting, "smart-home-lighting API", "Java, Spring, kafka, REST", "smart-home-lighting")
+ContainerDb(AuthenticationDB, "smart-home-authentication DB", "PostgreSQL", "Main DB for smart-home-authentication")
+ContainerDb(AuthorizationDB, "smart-home-authorization DB", "PostgreSQL", "Main DB for smart-home-authorization")
+ContainerDb(SmartHomeTelemetryDB, "smart-home-telemetry DB", "PostgreSQL", "Main DB for smart-home-telemetry")
+ContainerDb(SmartHomeDeviceDB, "smart-home-device DB", "PostgreSQL", "Main DB for smart-home-device")
+ContainerDb(SmartHomeHeatingDB, "smart-home-heating DB", "PostgreSQL", "Main DB for smart-home-heating")
+ContainerDb(SmartHomeAutomaticGateDB, "smart-home-monitoring-structure DB", "PostgreSQL", "Main DB for smart-home-automatic-gate")
+ContainerDb(SmartHomeMonitoringStructureDB, "smart-home-monitoring-structure DB", "PostgreSQL", "Main DB for smart-home-monitoring-structure")
+ContainerDb(SmartHomeLightingDB, "smart-home-lighting DB", "PostgreSQL", "Main DB for smart-home-lighting")
+}
+
+
+Rel(user, ui, "Uses the UI system")
+Rel(ui, GW, "Request/Response data")
+Rel(smartSensorsBox, sluice, "Request/Response data")
+Rel(sluice, producer_queue, "Request/Response data")
+Rel(sluice, consumer_queue, "Request/Response data")
+Rel(GW, Authentication, "Request/Response data")
+Rel(GW, Authorization, "Request/Response data")
+Rel(GW, SmartHomeTelemetry, "Request/Response data")
+Rel(SmartHomeTelemetry, producer_queue, "Request/Response data")
+Rel(SmartHomeDevice, consumer_queue, "Request/Response data")
+Rel(GW, SmartHomeDevice, "Request/Response data")
+Rel(SmartHomeDevice, SmartHomeHeating, "Request/Response data")
+Rel(SmartHomeDevice, SmartHomeMonitoringStructure, "Request/Response data")
+Rel(SmartHomeDevice, SmartHomeLighting, "Request/Response data")
+Rel(SmartHomeDevice, SmartHomeAutomaticGate, "Request/Response data")
+
+Rel(Authentication, AuthenticationDB, "Reads/Writes user data")
+Rel(Authorization, AuthorizationDB, "Reads/Writes user data")
+Rel(SmartHomeTelemetry, SmartHomeTelemetryDB, "Reads/Writes user and sensors data")
+Rel(SmartHomeDevice, SmartHomeDeviceDB, "Reads/Writes user and sensors data")
+Rel(SmartHomeHeating, SmartHomeHeatingDB, "Reads/Writes user and sensors data")
+Rel(SmartHomeMonitoringStructure, SmartHomeMonitoringStructureDB, "Reads/Writes user and sensors data")
+Rel(SmartHomeLighting, SmartHomeLightingDB, "Reads/Writes user and sensors data")
+Rel(SmartHomeAutomaticGate, SmartHomeAutomaticGateDB, "Reads/Writes user and sensors data")
+
+@enduml

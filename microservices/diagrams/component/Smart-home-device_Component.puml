@@ -1,0 +1,37 @@
+@startuml
+title SmartHomeDevice Web Application Component Diagram
+
+top to bottom direction
+
+!include ../basic/C4_Component.puml
+
+System(WebApp, "Backend Web Application", "Java, Spring", "smart-home-device microservice")
+ContainerDb(Database, "Database", "PostgreSQL", "Data smart-home-device microservice")
+System(Kafka, "Kafka brokers", "kafka", "Cluster kafka brokers")
+
+Container_Boundary(WebApp, "Backend Web Application") {
+  Component(DeviceController, "DeviceController", "Handles and manages API endpoints")
+  Component(DeviceService, "DeviceService", "Business logic")
+  Component(DeviceRepository, "DeviceRepository", "Data access logic")
+  Component(CommandDeviceController, "CommandDeviceController", "Handles and manages API endpoints")
+  Component(CommandDeviceConsumer, "CommandDeviceConsumer", "Handles and manages API kafka")
+  Component(CommandDeviceService, "CommandDeviceService", "Business logic")
+  Component(CommandDeviceRepository, "CommandDeviceRepository", "Data access logic")
+  Component(CommandDeviceProducer, "CommandDeviceProducer", "Data access logic")
+  Component(ManagerDeviceState, "ManagerDeviceState", "Get base information state device")
+  Component(RestTemplateAPI, "RestTemplateAPI", "Calls base API microservices")
+}
+
+Rel(DeviceController,DeviceService,"Calls business logic")
+Rel(ManagerDeviceState,RestTemplateAPI,"Calls business logic")
+Rel(DeviceService,DeviceRepository,"Reads/Writes data")
+Rel(CommandDeviceService,ManagerDeviceState,"Reads data")
+Rel(DeviceRepository,Database,"Reads/Writes user and sensors data")
+Rel(CommandDeviceController,CommandDeviceService,"Calls business logic")
+Rel(CommandDeviceConsumer,CommandDeviceService,"Request user command and sensors command data")
+Rel(CommandDeviceService,CommandDeviceRepository,"Reads/Writes data")
+Rel(CommandDeviceService,CommandDeviceProducer,"Writes data")
+Rel(CommandDeviceRepository,Database,"Reads/Writes user and sensors data")
+Rel(CommandDeviceProducer,Kafka,"Writes user command and sensors command data")
+Rel(DeviceService,ManagerDeviceState,"Reads data")
+@enduml

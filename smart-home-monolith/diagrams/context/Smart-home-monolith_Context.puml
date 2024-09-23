@@ -1,0 +1,17 @@
+@startuml
+title smart-home-monolith Context Diagram
+
+top to bottom direction
+
+!include ../basic/C4_Context.puml
+
+Person(user, "User", "A user of the smart home")
+System(ui, "Frontend", "Frontend for smart home monolith")
+System(smartSensorsBox, "smart-home-sensors-box", "smart-home-sensors-box for get data sensors and smart home control")
+System(monolith, "smart-home-monolith API", "Main API for control sensors and UI for User")
+
+Rel(user, ui, "Uses the UI system")
+Rel(ui, monolith, "API call")
+Rel(smartSensorsBox, monolith, "API call")
+
+@enduml

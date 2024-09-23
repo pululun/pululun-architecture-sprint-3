@@ -1,0 +1,44 @@
+server:
+  port: 8086
+  servlet:
+    contextPath: /devices
+
+spring:
+  liquibase:
+    change-log: classpath:db/db-changelog-master.xml
+    enabled: true
+    default-schema: device
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://173.17.0.5:5432/postgres
+    username: postgres
+    password: postgres
+    hikari:
+      auto-commit: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+      dialect:
+    show-sql: true
+    database: postgresql
+    open-in-view: true
+    initialize: false
+    properties:
+      hibernate:
+        order_by.default_null_ordering: first
+        format_sql: true
+        user_sql_comments: true
+        default_schema: device
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  kafka:
+    producer:
+      bootstrap-servers: 173.17.0.6:9092,173.17.0.7:9094,173.17.0.8:9096
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+app:
+  kafka:
+    topic:
+      device-command: DEVICE_COMMAND

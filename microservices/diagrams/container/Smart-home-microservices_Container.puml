@@ -9,7 +9,6 @@ System(UserAndBox, "User and smart box", "User and smart box generated request a
 System(VpnNetwork, "VPN network", "VPN Network for kafka request|response")
 System(Backend, "Backend", "Backend Smart home")
 
-
 Container_Boundary(UserAndBox, "smart-home-sensors-box and user") {
 Person(user, "User", "A user of the smart home")
 Container(smartSensorsBox, "smart-home-sensors-box", "Orange PI Zero 3 (1GB), Linux, Java, Spring boot", "smart-home-sensors-box for get data sensors and smart home control")
@@ -17,11 +16,9 @@ Container(smartSensorsBox, "smart-home-sensors-box", "Orange PI Zero 3 (1GB), Li
 
 Container(ui, "Frontend", "React, Nginx", "Frontend for smart home monolith")
 
-
 Container_Boundary(VpnNetwork, "VpnNetwork") {
-Container(sluice, "VPN sluice", "VPN sluice with dynamics DNS")
-SystemQueue(producer_queue, "Kafka", "Static create topics (producer on user or smart box)")
-SystemQueue(consumer_queue, "Kafka", "Dynamic create topics (producer on backend microservices)")
+SystemQueue(producer_queue, "Kafka topic: COMMAND_${serial_number}", "Dynamic create topics for each smart-home-sensors-box")
+SystemQueue(consumer_queue, "Kafka topic: TELEMETRY", "Static create topics")
 }
 
 Container_Boundary(Backend, "Backend") {
@@ -39,35 +36,33 @@ ContainerDb(AuthorizationDB, "smart-home-authorization DB", "PostgreSQL", "Main 
 ContainerDb(SmartHomeTelemetryDB, "smart-home-telemetry DB", "PostgreSQL", "Main DB for smart-home-telemetry")
 ContainerDb(SmartHomeDeviceDB, "smart-home-device DB", "PostgreSQL", "Main DB for smart-home-device")
 ContainerDb(SmartHomeHeatingDB, "smart-home-heating DB", "PostgreSQL", "Main DB for smart-home-heating")
-ContainerDb(SmartHomeAutomaticGateDB, "smart-home-monitoring-structure DB", "PostgreSQL", "Main DB for smart-home-automatic-gate")
+ContainerDb(SmartHomeAutomaticGateDB, "smart-home-automatic-gate DB", "PostgreSQL", "Main DB for smart-home-automatic-gate")
 ContainerDb(SmartHomeMonitoringStructureDB, "smart-home-monitoring-structure DB", "PostgreSQL", "Main DB for smart-home-monitoring-structure")
 ContainerDb(SmartHomeLightingDB, "smart-home-lighting DB", "PostgreSQL", "Main DB for smart-home-lighting")
 }
 
-
 Rel(user, ui, "Uses the UI system")
-Rel(ui, GW, "Request/Response data")
-Rel(smartSensorsBox, sluice, "Request/Response data")
-Rel(sluice, producer_queue, "Request/Response data")
-Rel(sluice, consumer_queue, "Request/Response data")
-Rel(GW, Authentication, "Request/Response data")
-Rel(GW, Authorization, "Request/Response data")
-Rel(GW, SmartHomeTelemetry, "Request/Response data")
-Rel(SmartHomeTelemetry, producer_queue, "Request/Response data")
-Rel(SmartHomeDevice, consumer_queue, "Request/Response data")
-Rel(GW, SmartHomeDevice, "Request/Response data")
-Rel(SmartHomeDevice, SmartHomeHeating, "Request/Response data")
-Rel(SmartHomeDevice, SmartHomeMonitoringStructure, "Request/Response data")
-Rel(SmartHomeDevice, SmartHomeLighting, "Request/Response data")
-Rel(SmartHomeDevice, SmartHomeAutomaticGate, "Request/Response data")
+Rel(ui, GW, "Request/Response [JSON/HTTP]")
+Rel(GW, Authentication, "Request/Response [JSON/HTTP]")
+Rel(GW, Authorization, "Request/Response [JSON/HTTP]")
+Rel(GW, SmartHomeTelemetry, "Request/Response [JSON/HTTP]")
+Rel(GW, SmartHomeDevice, "Request/Response [JSON/HTTP]")
+Rel(producer_queue, smartSensorsBox, "Consumer [kafka/TCP]")
+Rel(smartSensorsBox, consumer_queue, "Produce [kafka/TCP]")
+Rel(consumer_queue, SmartHomeTelemetry, "Consumer [kafka/TCP]")
+Rel(SmartHomeDevice, producer_queue , "Produce [kafka/TCP]")
+Rel(SmartHomeDevice, SmartHomeHeating, "Request/Response [JSON/HTTP]")
+Rel(SmartHomeDevice, SmartHomeMonitoringStructure, "Request/Response [JSON/HTTP]")
+Rel(SmartHomeDevice, SmartHomeLighting, "Request/Response [JSON/HTTP]")
+Rel(SmartHomeDevice, SmartHomeAutomaticGate, "Request/Response [JSON/HTTP]")
 
-Rel(Authentication, AuthenticationDB, "Reads/Writes user data")
-Rel(Authorization, AuthorizationDB, "Reads/Writes user data")
-Rel(SmartHomeTelemetry, SmartHomeTelemetryDB, "Reads/Writes user and sensors data")
-Rel(SmartHomeDevice, SmartHomeDeviceDB, "Reads/Writes user and sensors data")
-Rel(SmartHomeHeating, SmartHomeHeatingDB, "Reads/Writes user and sensors data")
-Rel(SmartHomeMonitoringStructure, SmartHomeMonitoringStructureDB, "Reads/Writes user and sensors data")
-Rel(SmartHomeLighting, SmartHomeLightingDB, "Reads/Writes user and sensors data")
-Rel(SmartHomeAutomaticGate, SmartHomeAutomaticGateDB, "Reads/Writes user and sensors data")
+Rel(Authentication, AuthenticationDB, "Reads/Writes to [SQL/TCP]")
+Rel(Authorization, AuthorizationDB, "Reads/Writes to [SQL/TCP]")
+Rel(SmartHomeTelemetry, SmartHomeTelemetryDB, "Reads/Writes to [SQL/TCP]")
+Rel(SmartHomeDevice, SmartHomeDeviceDB, "Reads/Writes to [SQL/TCP]")
+Rel(SmartHomeHeating, SmartHomeHeatingDB, "Reads/Writes to [SQL/TCP]")
+Rel(SmartHomeMonitoringStructure, SmartHomeMonitoringStructureDB, "Reads/Writes to [SQL/TCP]")
+Rel(SmartHomeLighting, SmartHomeLightingDB, "Reads/Writes to [SQL/TCP]")
+Rel(SmartHomeAutomaticGate, SmartHomeAutomaticGateDB, "Reads/Writes to [SQL/TCP]")
 
 @enduml

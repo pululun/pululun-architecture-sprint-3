@@ -1,0 +1,42 @@
+@startuml
+title SmartHomeDevice Web Application Component Diagram
+
+top to bottom direction
+
+!include ../basic/C4_Component.puml
+
+System(WebApp, "Backend Web Application", "Java, Spring", "smart-home-device microservice")
+ContainerDb(Database, "Database", "PostgreSQL", "Data smart-home-device microservice")
+System(gw, "GateWay API", "Spring Gateway", "GW for microservices")
+System(Kafka, "Kafka brokers", "kafka", "Cluster kafka brokers")
+Container(SmartHomeHeating, "smart-home-heating API", "Java, Spring, kafka, REST", "smart-home-heating")
+Container(SmartHomeAutomaticGate, "smart-home-automatic-gate API", "Java, Spring, kafka, REST", "smart-home-automatic-gate")
+Container(SmartHomeMonitoringStructure, "smart-home-monitoring-structure API", "Java, Spring, kafka, REST", "smart-home-monitoring-structure")
+Container(SmartHomeLighting, "smart-home-lighting API", "Java, Spring, kafka, REST", "smart-home-lighting")
+
+Container_Boundary(WebApp, "Backend Web Application") {
+  Component(DeviceController, "DeviceController", "Handles and manages API endpoints")
+  Component(DeviceService, "DeviceService", "Business logic")
+  Component(DeviceRepository, "DeviceRepository", "Data access logic")
+  Component(CommandDeviceProducer, "CommandDeviceProducer", "Data access logic")
+  Component(ManagerDeviceState, "ManagerDeviceState", "Get base information state device")
+  Component(RestTemplateAPI, "RestTemplateAPI", "Calls base API microservices")
+}
+
+Rel(DeviceController,DeviceService,"Calls business logic")
+Rel(ManagerDeviceState,RestTemplateAPI,"Calls business logic")
+Rel(DeviceService,DeviceRepository,"Reads/Writes data")
+Rel(DeviceRepository,Database,"Reads/Writes to [SQL/TCP]")
+Rel(DeviceService,CommandDeviceProducer,"Writes data")
+Rel(CommandDeviceProducer,Kafka,"Produce to kafka [kafka/TCP]")
+Rel(DeviceService,ManagerDeviceState,"Reads data")
+Rel(gw,DeviceController,"Request\Response [JSON\HTTP]")
+Rel(SmartHomeHeating,DeviceController,"Request command [JSON\HTTP]")
+Rel(SmartHomeAutomaticGate,DeviceController,"Request command [JSON\HTTP]")
+Rel(SmartHomeMonitoringStructure,DeviceController,"Request command [JSON\HTTP]")
+Rel(SmartHomeLighting,DeviceController,"Request command [JSON\HTTP]")
+Rel(RestTemplateAPI,SmartHomeHeating,"Request\Response initial command or get actual data [JSON\HTTP]")
+Rel(RestTemplateAPI,SmartHomeAutomaticGate,"Request\Response initial command or get actual data [JSON\HTTP]")
+Rel(RestTemplateAPI,SmartHomeMonitoringStructure,"Request\Response initial command or get actual data [JSON\HTTP]")
+Rel(RestTemplateAPI,SmartHomeLighting,"Request\Response initial command or get actual data [JSON\HTTP]")
+@enduml

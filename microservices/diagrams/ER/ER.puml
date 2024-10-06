@@ -1,0 +1,116 @@
+@startuml
+title SmartHomeMonolith Management Code Diagram
+
+class User {
+  +Long id
+  +String name
+  +String surname
+  +String patronymic
+  +String phone
+  +String login
+  +String password
+  +String email
+  +boolean isActive
+}
+
+class RoleUser {
+  +Long UserId
+  +boolean isActive
+}
+
+class Role {
+  +Long id
+  +String name
+}
+
+class Device {
+  +Long id
+  +String model
+  +String serialNumber
+  +Long deviceTypeId
+  +Long userId
+}
+
+class DeviceType {
+  +Long id
+  +String type
+  +LocalDateTime lastUpdated
+}
+
+class Module {
+  +Long id
+  +String name
+  +String serialNumber
+  +LocalDateTime lastUpdated
+}
+
+class DeviceTypeModule {
+  +Long deviceTypeId
+  +Long moduleId
+}
+
+class TelemetryData {
+  +Long id
+  +Long userId
+  +Long deviceId
+  +Long moduleId
+  +String operationType
+  +LocalDateTime lastUpdated
+  +String data
+}
+
+class HeatingSystem {
+  +Long id
+  +boolean isOn
+  +double targetTemperature
+  +double currentTemperature
+}
+
+class TemperatureSensor {
+  +Long id
+  +double currentTemperature
+  +LocalDateTime lastUpdated
+}
+
+class AutomaticGate {
+  +Long id
+  +boolean isOpen
+  +LocalDateTime lastUpdated
+}
+
+class InterrupterSensor {
+  +Long id
+  +String name
+  +double currentState
+  +LocalDateTime lastUpdated
+  +Long automaticGateId
+}
+
+class lighting {
+  +Long id
+  +boolean isOn
+  +LocalDateTime lastUpdated
+}
+
+class lightingSensor {
+  +Long id
+  +String name
+  +double currentState
+  +LocalDateTime lastUpdated
+}
+
+class HouseSurveillance {
+  +Long id
+  +boolean isActiveMonitoring
+  +LocalDateTime lastActive
+}
+
+Device }|..|| DeviceType
+Device ||..|{ DeviceTypeModule
+Module ||..|{ DeviceTypeModule
+Role ||..|{ RoleUser
+AutomaticGate ||..|{ InterrupterSensor
+lighting ||..|{ lightingSensor
+HeatingSystem ||..|{ TemperatureSensor
+
+@enduml

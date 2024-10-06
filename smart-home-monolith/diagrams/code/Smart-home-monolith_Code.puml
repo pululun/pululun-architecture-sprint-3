@@ -1,0 +1,21 @@
+@startuml
+title SmartHomeMonolith Management Code Diagram
+
+top to bottom direction
+
+!include ../basic/C4_Component.puml
+
+class HeatingSystem {
+  +Long id
+  +boolean isOn
+  +double targetTemperature
+  +double currentTemperature
+}
+
+class TemperatureSensor {
+  +Long id
+  +double currentTemperature
+  +LocalDateTime lastUpdated
+}
+
+@enduml

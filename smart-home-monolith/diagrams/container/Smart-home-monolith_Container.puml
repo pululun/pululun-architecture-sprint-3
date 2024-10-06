@@ -1,0 +1,29 @@
+@startuml
+title FitLife Container Diagram
+
+top to bottom direction
+
+!include ../basic/C4_Container.puml
+
+System(UserAndBox, "User and smart box", "User and smart box generated request and response queries")
+System(Backend, "smart-home-monolith and DB", "Backend Smart home ")
+
+Container_Boundary(UserAndBox, "smart-home-sensors-box and user") {
+Person(user, "User", "A user of the smart home")
+Container(smartSensorsBox, "smart-home-sensors-box", "Orange PI Zero 3 (1GB), Linux, Java, Spring boot", "smart-home-sensors-box for get data sensors and smart home control")
+}
+
+Container(ui, "Frontend", "React, Nginx", "Frontend for smart home monolith")
+
+Container_Boundary(Backend, "Backend") {
+Container(monolith, "smart-home-monolith API", "Java, Spring", "Main API for control sensors and UI for User")
+Container(monolithDB, "smart-home-monolith DB", "PostgreSQL", "Main DB for smart-home-monolith")
+}
+
+
+Rel(user, ui, "Uses the UI system")
+Rel(ui, monolith, "Request/Response data")
+Rel(smartSensorsBox, monolith, "Request/Response data")
+Rel(monolith, monolithDB, "Reads/Writes user and sensors data")
+
+@enduml

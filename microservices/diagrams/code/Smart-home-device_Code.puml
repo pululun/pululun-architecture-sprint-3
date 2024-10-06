@@ -1,0 +1,12 @@
+@startuml
+title smart-home-device microservices Management Code Diagram
+
+DeviceController o-- DeviceService
+DeviceService ..> ExceptionHandler
+ExceptionHandler ..> DeviceNotFound
+DeviceService o-- DeviceRepository
+DeviceService o-- ManagerDeviceState
+ManagerDeviceState o-- RestTemplateAPI
+DeviceService o-- KafkaTemplate
+
+@enduml
